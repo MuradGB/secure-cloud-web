@@ -11,7 +11,6 @@ function AuthPage() {
     const [darkMode, setDarkMode] = useState(false);
     const navigate = useNavigate();
 
-    // تفعيل الوضع المظلم عند تحميل الصفحة إذا كان محفوظاً مسبقاً
     useEffect(() => {
         if (localStorage.getItem('theme') === 'dark') {
         setDarkMode(true);
@@ -19,7 +18,6 @@ function AuthPage() {
         }
     },[]);
 
-    // دالة تبديل الوضع المظلم والمضيء
     const toggleTheme = () => {
         if (darkMode) {
         document.documentElement.classList.remove('dark');
@@ -39,7 +37,6 @@ function AuthPage() {
 
         try {
         if (isLogin) {
-            // --- تسجيل الدخول ---
             const response = await axios.post('https://secure-cloud-api-3x07.onrender.com/api/auth/login', {
             email: formData.email,
             password: formData.password
@@ -48,12 +45,11 @@ function AuthPage() {
             sessionStorage.setItem('token', response.data.token);
             sessionStorage.setItem('user', JSON.stringify(response.data.user));
 
-            setMessage('✅ تم تسجيل الدخول بنجاح! جاري التوجيه...');
+            setMessage('تم تسجيل الدخول بنجاح! جاري التوجيه...');
             setTimeout(() => navigate('/dashboard'), 1000);
             
         } else {
-            // --- إنشاء الحساب وتوليد مفاتيح RSA ---
-            setMessage('⏳ جاري توليد مفاتيح التشفير (RSA-2048)... يرجى الانتظار');
+            setMessage('جاري توليد مفاتيح التشفير (RSA-2048)... يرجى الانتظار');
             const keys = await generateKeysAndEncryptPrivate(formData.password);
 
             await axios.post('https://secure-cloud-api-3x07.onrender.com/api/auth/register', {
@@ -64,11 +60,11 @@ function AuthPage() {
             encryptedPrivateKey: keys.encryptedPrivateKey
             });
 
-            setMessage('🎉 تم إنشاء الحساب ومفاتيح التشفير بنجاح! سجل دخولك الآن.');
-            setIsLogin(true); // تحويله لصفحة الدخول
+            setMessage(' تم إنشاء الحساب ومفاتيح التشفير بنجاح! سجل دخولك الآن.');
+            setIsLogin(true); 
         }
         } catch (error) {
-        setMessage('❌ خطأ: ' + (error.response?.data?.message || 'حدث خطأ في الاتصال بالخادم'));
+        setMessage(' خطأ: ' + (error.response?.data?.message || 'حدث خطأ في الاتصال بالخادم'));
         } finally {
         setIsLoading(false);
         }
@@ -77,7 +73,6 @@ function AuthPage() {
     return (
         <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 font-sans transition-colors duration-300" dir="rtl">
         
-        {/* زر الوضع المظلم */}
         <button onClick={toggleTheme} className="absolute top-4 left-4 z-50 p-2 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-yellow-400 shadow-lg hover:scale-110 transition">
             {darkMode ? (
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -86,7 +81,6 @@ function AuthPage() {
             )}
         </button>
 
-        {/* النصف الأيمن: الجانب البصري والتعريفي بالنظام */}
         <div className="md:w-1/2 bg-slate-900 dark:bg-slate-950 text-white flex flex-col justify-center items-center p-8 relative overflow-hidden border-l border-transparent dark:border-slate-800 transition-colors duration-300">
             <div className="absolute inset-0 bg-blue-600 opacity-20 blur-3xl rounded-full w-96 h-96 top-1/4 left-1/4"></div>
             
@@ -99,7 +93,6 @@ function AuthPage() {
                 أول منصة تخزين سحابي تعتمد على المعرفة الصفرية. 
                 <span className="text-blue-400 font-semibold px-1">تشفير AES-256</span> و <span className="text-blue-400 font-semibold px-1">RSA-2048</span> من طرف إلى طرف.
             </p>
-            {/* زر تحميل التطبيق */}
             <div className="mt-10 flex justify-center">
                 <a 
                 href="https://github.com/MuradGB/secure-cloud-web/releases/download/v1.0/ZeroCloud.apk" 
@@ -114,11 +107,9 @@ function AuthPage() {
             </div>
         </div>
 
-        {/* النصف الأيسر: نموذج تسجيل الدخول */}
         <div className="md:w-1/2 flex flex-col items-center justify-center p-8 relative">
             <div className="w-full max-w-md bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-slate-100 dark:border-slate-800 transition-colors duration-300">
             
-            {/* أزرار التبديل */}
             <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-lg mb-8 transition-colors duration-300">
                 <button onClick={() => setIsLogin(true)} className={`flex-1 py-2 font-bold rounded-md transition ${isLogin ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>تسجيل الدخول</button>
                 <button onClick={() => setIsLogin(false)} className={`flex-1 py-2 font-bold rounded-md transition ${!isLogin ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}>إنشاء حساب</button>
@@ -157,7 +148,6 @@ function AuthPage() {
                 </button>
             </form>
             
-            {/* رسائل النظام */}
             {message && (
                 <div className={`mt-4 p-3 text-sm rounded-lg text-center font-bold ${message.includes('خطأ') ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}`}>
                 {message}
