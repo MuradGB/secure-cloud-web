@@ -48,10 +48,9 @@ function Dashboard() {
             setSharedFilesList(resSharedFiles.data); 
             } catch (err) { 
             console.error('فشل جلب الملفات', err); 
-            // 💡 التعديل الأمني هنا: إذا انتهت صلاحية التوكن (بعد 24 ساعة)، اطرد المستخدم فوراً!
             if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-                sessionStorage.clear(); // تنظيف الذاكرة الوهمية
-                navigate('/auth'); // تحويله لصفحة تسجيل الدخول
+                sessionStorage.clear(); 
+                navigate('/auth'); 
             }
         }
     };
@@ -64,14 +63,14 @@ function Dashboard() {
     },[navigate]);
 
     const handleUpload = async () => {
-        if (!file) { setStatus('⚠️ يرجى اختيار ملف أولاً'); return; }
+        if (!file) { setStatus(' يرجى اختيار ملف أولاً'); return; }
         try {
-        setStatus('⏳ جاري قراءة الملف وتجهيزه...');
+        setStatus(' جاري قراءة الملف وتجهيزه...');
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
             const fileData = reader.result;
-            setStatus('🔒 جاري التشفير المعقد (AES-256 + RSA-2048)...');
+            setStatus(' جاري التشفير المعقد (AES-256 + RSA-2048)...');
             const fileHash = getFileHash(fileData);
             const { encryptedFileBase64, aesKeyBase64, ivBase64 } = encryptFileWithAES(fileData);
             const encryptedAesKey = encryptAESKeyWithRSA(aesKeyBase64, ivBase64, user.publicKey);
@@ -84,14 +83,14 @@ function Dashboard() {
             formData.append('fileHash', fileHash);
             formData.append('encryptedAesKey', encryptedAesKey);
             await axios.post('https://secure-cloud-api-3x07.onrender.com/api/files/upload', formData, { headers: { 'Authorization': `Bearer ${token}` } });
-            setStatus('✅ تم تشفير ورفع الملف بنجاح!');
+            setStatus(' تم تشفير ورفع الملف بنجاح!');
             setFile(null);
             fetchAllFiles(token);
             setTimeout(() => setStatus(''), 5000);
         };
         } catch (error) { 
             const serverMessage = error.response?.data?.message;
-            setStatus(serverMessage ? `🚨 ${serverMessage}` : `❌ حدث خطأ أثناء التشفير أو الرفع`); 
+            setStatus(serverMessage ? ` ${serverMessage}` : ` حدث خطأ أثناء التشفير أو الرفع`); 
         }
     };
 
@@ -119,48 +118,48 @@ function Dashboard() {
             const token = sessionStorage.getItem('token');
             const response = await axios.get(`https://secure-cloud-api-3x07.onrender.com/api/files/download/${fileId}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const { fileName, fileHash, encryptedAesKey, encryptedContent } = response.data;
-            setStatus('🔓 جاري فك التشفير محلياً...');
+            setStatus(' جاري فك التشفير محلياً...');
             const { key: aesKeyBase64, iv: ivBase64 } = decryptAESKeyWithRSA(encryptedAesKey, user.encryptedPrivateKey, password);
             const decryptedFileData = decryptFileWithAES(encryptedContent, aesKeyBase64, ivBase64);
-            setStatus('🛡️ جاري التحقق من بصمة الملف...');
-            if (getFileHash(decryptedFileData) !== fileHash) { setStatus('🚨 تحذير: تم التلاعب بالملف!'); return; }
-            setStatus('✅ تم فك التشفير بنجاح!');
+            setStatus(' جاري التحقق من بصمة الملف...');
+            if (getFileHash(decryptedFileData) !== fileHash) { setStatus(' تحذير: تم التلاعب بالملف!'); return; }
+            setStatus(' تم فك التشفير بنجاح!');
             const a = document.createElement("a");
             a.href = decryptedFileData; a.download = fileName;
             document.body.appendChild(a); a.click(); document.body.removeChild(a);
             setTimeout(() => setStatus(''), 3000);
         } catch (error) { 
             const serverMessage = error.response?.data?.message;
-            setStatus(serverMessage ? `🚨 ${serverMessage}` : `❌ كلمة المرور خاطئة أو فشل التنزيل`); 
+            setStatus(serverMessage ? ` ${serverMessage}` : ` كلمة المرور خاطئة أو فشل التنزيل`); 
         }
         } 
         else if (type === 'share') {
         try {
-            setStatus('🔍 جاري البحث عن المستخدم...');
+            setStatus(' جاري البحث عن المستخدم...');
             const token = sessionStorage.getItem('token');
             const userRes = await axios.post('https://secure-cloud-api-3x07.onrender.com/api/files/search-user', { email: email }, { headers: { 'Authorization': `Bearer ${token}` } });
             const receiver = userRes.data;
-            setStatus('🔄 جاري إعادة تشفير المفتاح للمستلم...');
+            setStatus(' جاري إعادة تشفير المفتاح للمستلم...');
             const fileRes = await axios.get(`https://secure-cloud-api-3x07.onrender.com/api/files/download/${fileId}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const { key: aesKeyBase64, iv: ivBase64 } = decryptAESKeyWithRSA(fileRes.data.encryptedAesKey, user.encryptedPrivateKey, password);
             const newEncryptedAesKey = encryptAESKeyWithRSA(aesKeyBase64, ivBase64, receiver.public_key);
-            setStatus('☁️ جاري إرسال الصلاحيات...');
+            setStatus(' جاري إرسال الصلاحيات...');
             await axios.post('https://secure-cloud-api-3x07.onrender.com/api/files/share', { fileId, receiverId: receiver.id, encryptedAesKeyForReceiver: newEncryptedAesKey }, { headers: { 'Authorization': `Bearer ${token}` } });
-            setStatus(`✅ تمت مشاركة الملف بنجاح مع ${receiver.username}!`);
+            setStatus(` تمت مشاركة الملف بنجاح مع ${receiver.username}!`);
             fetchAllFiles(token); 
             setTimeout(() => setStatus(''), 5000);
-        } catch (error) { setStatus(`❌ فشلت المشاركة: تأكد من الإيميل أو كلمة المرور`); }
+        } catch (error) { setStatus(` فشلت المشاركة: تأكد من الإيميل أو كلمة المرور`); }
         }
 
     else if (type === 'delete') {
         try {
-            setStatus('🗑️ جاري الحذف...');
+            setStatus(' جاري الحذف...');
             const token = sessionStorage.getItem('token');
             await axios.delete(`https://secure-cloud-api-3x07.onrender.com/api/files/delete/${fileId}`, { headers: { 'Authorization': `Bearer ${token}` } });
-            setStatus('✅ تم حذف الملف نهائياً بنجاح!');
+            setStatus(' تم حذف الملف نهائياً بنجاح!');
             fetchAllFiles(token);
             setTimeout(() => setStatus(''), 4000);
-        } catch (error) { setStatus('❌ حدث خطأ أثناء الحذف'); }
+        } catch (error) { setStatus(' حدث خطأ أثناء الحذف'); }
     }
     };
 
@@ -321,7 +320,6 @@ function Dashboard() {
                 <span className="bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs py-1 px-2 rounded-full">{filteredFiles.length}</span>
                 </h2>
                 <div className="flex bg-slate-200 dark:bg-slate-800 p-1 rounded-lg shadow-inner">
-                {/* 💡 أزرار التبديل بنظام SVG الاحترافي */}
                 <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 </button>
@@ -422,8 +420,7 @@ function Dashboard() {
                                 {activeTab === 'my_files' && (
                                 <>
                                 <button onClick={() => openShareModal(f.id)} className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white px-4 py-1.5 rounded-lg text-sm font-bold transition shadow-sm hover:-translate-y-0.5">مشاركة 🤝</button>
-                                {/* 💡 زر الحذف الجديد 🗑️ */}
-                                <button onClick={() => setModal({ isOpen: true, type: 'delete', fileId: f.id, title: 'حذف الملف', desc: '⚠️ هل أنت متأكد أنك تريد حذف هذا الملف نهائياً؟ لا يمكن التراجع عن هذا الإجراء.' })} className="bg-red-50 text-red-500 hover:bg-red-600 hover:text-white dark:bg-red-900/20 dark:hover:bg-red-600 px-3 py-1.5 rounded-lg transition shadow-sm hover:-translate-y-0.5" title="حذف">
+                                <button onClick={() => setModal({ isOpen: true, type: 'delete', fileId: f.id, title: 'حذف الملف', desc: ' هل أنت متأكد أنك تريد حذف هذا الملف نهائياً؟ لا يمكن التراجع عن هذا الإجراء.' })} className="bg-red-50 text-red-500 hover:bg-red-600 hover:text-white dark:bg-red-900/20 dark:hover:bg-red-600 px-3 py-1.5 rounded-lg transition shadow-sm hover:-translate-y-0.5" title="حذف">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                                 </>
