@@ -240,7 +240,7 @@ function Dashboard() {
             </nav>
 
             <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-            <a href="/ZeroCloud.apk" download className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition font-medium mb-2">
+            <a href="https://github.com/MuradGB/secure-cloud-web/releases/download/v1.0/ZeroCloud.apk" download className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition font-medium mb-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             تنزيل تطبيق الهاتف
             </a>
