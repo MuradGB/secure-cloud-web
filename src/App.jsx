@@ -9,20 +9,17 @@ function App() {
   const [continueToWeb, setContinueToWeb] = useState(false);
 
   useEffect(() => {
-    // 💡 ذكاء اصطناعي بسيط لاكتشاف نوع الجهاز (هاتف أم كمبيوتر)
     const userAgent = navigator.userAgent || navigator.vendor || window.opera;
     if (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase())) {
       setIsMobile(true);
     }
     
-    // تفعيل الوضع المظلم الافتراضي للموقع ليتناسب مع فخامة شاشة الهاتف
     if (!localStorage.getItem('theme')) {
         document.documentElement.classList.add('dark');
         localStorage.setItem('theme', 'dark');
     }
   },[]);
 
-  // 📱 شاشة الترحيب الخاصة بالهاتف المحمول
   if (isMobile && !continueToWeb) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 text-slate-100 p-6" dir="rtl">
@@ -35,7 +32,7 @@ function App() {
           اكتشفنا أنك تستخدم هاتفاً محمولاً للحصول على تجربة إستخدام أفضل ننصحك بتحميل تطبيقنا المخصص للهواتف.
         </p>
 
-        {/* زر تحميل التطبيق - سنربطه بملف الـ APK بعد استخراجه لاحقاً */}
+   
         <a 
           href="https://github.com/MuradGB/secure-cloud-web/releases/download/v1.0/ZeroCloud.apk" 
           className="w-full max-w-sm bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 mb-4 transition-transform hover:-translate-y-1"
@@ -45,7 +42,6 @@ function App() {
           تحميل التطبيق (APK)
         </a>
 
-        {/* زر التخطي للموقع */}
         <button 
           onClick={() => setContinueToWeb(true)} 
           className="w-full max-w-sm bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-4 rounded-xl transition-colors"
@@ -56,7 +52,6 @@ function App() {
     );
   }
 
-  // 💻 الموقع الطبيعي للكمبيوتر (أو إذا اختار المستخدم الاستمرار للويب من هاتفه)
   return (
     <Router>
       <div className="font-sans min-h-screen text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-950 transition-colors duration-300" dir="rtl">
